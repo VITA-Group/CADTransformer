@@ -1,7 +1,7 @@
 """Download FloorPlanCAD dataset."""
 import os
 import argparse
-import wget
+import gdown
 
 def parse_args():
     '''
@@ -12,16 +12,16 @@ def parse_args():
                         help='save the downloaded data'
                         )
     parser.add_argument('--train00_url', type=str,
-                        default="https://floorplancad.oss-cn-hangzhou.aliyuncs.com/iccv2021/train-00.tar.xz",
-                        help='oss url'
+                        default="161HTPovDcggsttiOe9ynh-FsAdYu0B1Z",
+                        help='google drive id'
                         )
     parser.add_argument('--train01_url', type=str,
-                        default="https://floorplancad.oss-cn-hangzhou.aliyuncs.com/iccv2021/train-01.tar.xz",
-                        help='oss url'
+                        default="1WbxUiScp7I2MG8hYCDXsIpml3ge_8PNS",
+                        help='google drive id'
                         )
     parser.add_argument('--test00_url', type=str,
-                        default="https://floorplancad.oss-cn-hangzhou.aliyuncs.com/iccv2021/test-00.tar.xz",
-                        help='oss url'
+                        default="1PUP_8EOdau_PNAl-VNhv0A5m-yA4PFnx",
+                        help='google drive id'
                         )
     args = parser.parse_args()
     return args
@@ -34,12 +34,12 @@ def main():
     os.makedirs(args.data_save_dir, exist_ok=True)
 
     # download
-    file_name = wget.download(args.train00_url, out=os.path.join(args.data_save_dir, "train-00.tar.xz"))
-    print(file_name)
-    file_name = wget.download(args.train01_url, out=os.path.join(args.data_save_dir, "train-01.tar.xz"))
-    print(file_name)
-    file_name = wget.download(args.test00_url, out=os.path.join(args.data_save_dir, "test-00.tar.xz"))
-    print(file_name)
+    url = f"https://drive.google.com/uc?id={args.train00_url}"
+    gdown.download(url, f"{args.data_save_dir}/train-00.tar.xz")
+    url = f"https://drive.google.com/uc?id={args.train01_url}"
+    gdown.download(url, f"{args.data_save_dir}/train-01.tar.xz")
+    url = f"https://drive.google.com/uc?id={args.test00_url}"
+    gdown.download(url, f"{args.data_save_dir}/test-00.tar.xz")
 
     # unzip
     zip_path = os.path.join(args.data_save_dir, "train-00.tar.xz")
