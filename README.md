@@ -1,4 +1,5 @@
 # CADTransformer
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 Official Pytorch Implementation of CVPR2022 "CADTransformer: Panoptic Symbol Spotting Transformer for CAD Drawings"(Oral)
 
 ## Installation
@@ -14,7 +15,7 @@ opencv-python
 matplotlib
 scipy
 tqdm
-wget
+gdown
 svgpathtools
 ```
 Our code should compatible with pytorch>=1.5.0
@@ -90,3 +91,16 @@ python scripts/evaluate_pq.py  --raw_pred_dir /PATH/TO/SAVE_DIR/IN/PREVIOUS/STEP
 
 ### Acknowledgement
 Thanks to Ross Wightman, qq456cvb, Ke Sun for opening source of their excellent works [pytorch-image-models](https://github.com/rwightman/pytorch-image-models), [Point-Transformers](https://github.com/qq456cvb/Point-Transformers),  [HRNet](https://github.com/HRNet/HRNet-Image-Classification).
+
+### Citation
+
+If you find our code implementation helpful for your own resarch or work, please cite our paper.
+```
+@inproceedings{fan2022cadtransformer,
+  title={CADTransformer: Panoptic Symbol Spotting Transformer for CAD Drawings},
+  author={Fan, Zhiwen and Chen, Tianlong and Wang, Peihao and Wang, Zhangyang},
+  booktitle={Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition},
+  pages={10986--10996},
+  year={2022}
+}
+```
