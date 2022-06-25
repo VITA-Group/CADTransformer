@@ -1,6 +1,6 @@
-# CADTransformer
+# CADTransformer: Panoptic Symbol Spotting Transformer for CAD Drawings
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
-Official Pytorch Implementation of CVPR2022 "CADTransformer: Panoptic Symbol Spotting Transformer for CAD Drawings"(Oral)
+Official Pytorch Implementation of CVPR2022 
 
 ## Installation
 We recommend users to use `conda` to install the running environment. The following dependencies are required:
