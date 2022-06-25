@@ -89,10 +89,10 @@ python scripts/evaluate_pq.py  --raw_pred_dir /PATH/TO/SAVE_DIR/IN/PREVIOUS/STEP
 --svg_pred_dir /PATH/TO/PROJECT_DIR/FloorPlanCAD/svg_pred --svg_gt_dir /PATH/TO/PROJECT_DIR/FloorPlanCAD/svg_gt  --thread_num 6
 ```
 
-### Acknowledgement
+## Acknowledgement
 Thanks to Ross Wightman, qq456cvb, Ke Sun for opening source of their excellent works [pytorch-image-models](https://github.com/rwightman/pytorch-image-models), [Point-Transformers](https://github.com/qq456cvb/Point-Transformers),  [HRNet](https://github.com/HRNet/HRNet-Image-Classification).
 
-### Citation
+## Citation
 
 If you find our code implementation helpful for your own resarch or work, please cite our paper.
 ```
