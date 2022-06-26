@@ -1,4 +1,4 @@
-# CADTransformer: Panoptic Symbol Spotting Transformer for CAD Drawings
+# CADTransformer: Panoptic Symbol Spotting Transformer for CAD Drawings(CVPR2022 Oral)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 Official Pytorch Implementation of CVPR2022 
 
