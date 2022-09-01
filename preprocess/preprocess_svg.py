@@ -11,8 +11,7 @@ from svgpathtools import parse_path
 import multiprocessing as mp
 from multiprocessing import Pool
 from functools import partial
-from utils_dataset import *
-from config.anno_config import RemapDict
+from _utils_dataset import *
 import torch
 
 def parse_args():
@@ -27,7 +26,7 @@ def parse_args():
     parser.add_argument('-v', '--visualize', type=bool,
                         help='the visualize flag', default=False)
     parser.add_argument('--thread_num', type=int,
-                        help='multiprocess number', default=4)
+                        help='multiprocess number', default=48)
     args = parser.parse_args()
     return args
 
@@ -86,7 +85,7 @@ def svg2graph(svg_path, output_dir, max_degree, visualize):
                 raise RuntimeError("Parse path failed!{}, {}".format(svg_path, path.attrib['d']))
             start = path_repre.point(0)
             end = path_repre.point(1)
-            segments.append([start.real, start.imag, 
+            segments.append([start.real, start.imag,
                 end.real, end.imag])
             # starts_ends.append([start.real, start.imag, end.real, end.imag, end.real, end.imag, start.real, start.imag])
             mid = path_repre.point(0.5)
@@ -95,12 +94,12 @@ def svg2graph(svg_path, output_dir, max_degree, visualize):
             nodes.append([length / width, (mid.real - minx) / width,
                 (mid.imag - miny) / height, 1, 0, 0])
             centers.append([mid.real, mid.imag])
-            if 'semantic-id' in path.attrib:
-                classes.append([int(path.attrib['semantic-id'])])
+            if 'semanticId' in path.attrib:
+                classes.append([int(path.attrib['semanticId'])])
             else:
                 classes.append([0])
-            if 'instance-id' in path.attrib:
-                instances.append([int(path.attrib['instance-id'])])
+            if 'instanceId' in path.attrib:
+                instances.append([int(path.attrib['instanceId'])])
             else:
                 instances.append([-1])
         # circle
@@ -112,12 +111,12 @@ def svg2graph(svg_path, output_dir, max_degree, visualize):
             # starts_ends.append([cx - r, cy, cx + r, cy, cx + r, cy, cx - r, cy])
             nodes.append([r * 2.0 / width, (cx - minx) / width, (cy - miny) / height, 0, 1, 0])
             centers.append([cx, cy])
-            if 'semantic-id' in circle.attrib:
-                classes.append([int(circle.attrib['semantic-id'])])
+            if 'semanticId' in circle.attrib:
+                classes.append([int(circle.attrib['semanticId'])])
             else:
                 classes.append([0])
-            if 'instance-id' in circle.attrib:
-                instances.append([int(circle.attrib['instance-id'])])
+            if 'instanceId' in circle.attrib:
+                instances.append([int(circle.attrib['instanceId'])])
             else:
                 instances.append([-1])
         # ellipse
@@ -130,15 +129,15 @@ def svg2graph(svg_path, output_dir, max_degree, visualize):
             # starts_ends.append([cx - rx, cy, cx + rx, cy, cx + r, cy, cx - r, cy])
             nodes.append([(rx + ry) / width, (cx - minx) / width, (cy - miny) / height, 0, 0, 1])
             centers.append([cx, cy])
-            if 'semantic-id' in ellipse.attrib:
-                classes.append([int(ellipse.attrib['semantic-id'])])
+            if 'semanticId' in ellipse.attrib:
+                classes.append([int(ellipse.attrib['semanticId'])])
             else:
                 classes.append([0])
-            if 'instance-id' in ellipse.attrib:
-                instances.append([int(ellipse.attrib['instance-id'])])
+            if 'instanceId' in ellipse.attrib:
+                instances.append([int(ellipse.attrib['instanceId'])])
             else:
                 instances.append([-1])
- 
+
     segments = np.array(segments)
     nns = get_nn(copy.deepcopy(segments), max_degree=max_degree)
     if segments.shape[0] < 2:
@@ -146,20 +145,7 @@ def svg2graph(svg_path, output_dir, max_degree, visualize):
         return
 
     basename = os.path.basename(svg_path)
-    # segments_path = os.path.join(output_dir, 
-    #     './temp/' , basename.replace(".svg", ".segments.npy"))
-    # np.save(segments_path, segments)
 
-    # adj_path = os.path.join(output_dir, './temp/', basename.replace(".svg", ".adj.npy"))
-    # cmd = 'datasets/parsing/construct_graph/construct_graph {0} {1} {2} {3}'.format(segments_path, adj_path, neighbor_radius, max_degree)
-    # ret = os.system(cmd)
-    # if ret != 0:
-    #     print('Error: construct_graph exit abnormally')
-
-    # adj = np.load(adj_path)
-    # if (adj.shape[0] < 2):
-    #     print('Warning: too few edges')
-    #     return
     if visualize:
         vis_path = os.path.join(output_dir, './visualize/' , basename)
         print(f"vis to {vis_path}")
@@ -169,8 +155,8 @@ def svg2graph(svg_path, output_dir, max_degree, visualize):
     for c in centers:
         centers_norm.append([(c[0] - half_width) / half_width, (c[1] - half_height) / half_height])
     data_gcn = {
-         "nd_ft": nodes, "ct": centers, 
-         "cat": classes, "ct_norm": centers_norm, 
+         "nd_ft": nodes, "ct": centers,
+         "cat": classes, "ct_norm": centers_norm,
          "nns":nns, "inst":instances
          }
     npy_path = os.path.join(output_dir, basename.replace(".svg", ".npy"))

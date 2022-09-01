@@ -12,9 +12,9 @@ pred/*
 *.zip
 *.pth
 *.png
-*.pth
 *.pdf
-*.png 
+*.png
 *.log
 *.pyc
 *tmp*.py
+pretrained_models

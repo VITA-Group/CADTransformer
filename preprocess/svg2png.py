@@ -6,8 +6,7 @@ import argparse
 from glob import glob
 from multiprocessing import Pool
 from functools import partial
-from utils_dataset import *
-from config.anno_config import RemapDict
+from _utils_dataset import *
 
 def cvt_svg2png(svg_path, replace1, replace2, scale=7):
     '''Function: convert svg to png
@@ -15,22 +14,6 @@ def cvt_svg2png(svg_path, replace1, replace2, scale=7):
     out_path = svg_path.replace(replace1, replace2)
     out_path = out_path.replace(".svg", ".png")
     svg2png(svg_path, out_path, scale=scale)
-
-def cvt_label(svg_path, output_dir, remap=None):
-    '''Function: convert the annotation from v2 to v1 style of FloorPlanCAD dataset.
-    '''
-    tmp = svg_reader(svg_path)
-    basename = os.path.basename(svg_path)
-    for _, line in enumerate(tmp):
-        if "semantic-id" in line.keys():
-            id = line["semantic-id"]
-            id_remapped = remap.mapping[int(id)]
-            line["semantic-id"] = str(id_remapped)
-    save_path =  f"{output_dir}/{basename}"
-    if os.path.exists(save_path):
-        save_path = save_path.replace(".svg", "_1.svg")
-        print(f"Duplicated:  > {save_path}")
-    svg_writer(tmp, save_path)
 
 def combine_trainset(dir0, dir1, dir_all):
     '''Function: Combine the two training subsets into one
@@ -89,7 +72,8 @@ def scaleSVG(svg_path, scale, cvt_color=False):
                      float(line["cy"]), float(line["rx"]), float(line["ry"])
             line["cx"], line["cy"], line["rx"], line["ry"] = \
                      str(cx * scale), str(cy * scale), str(rad_x * scale), str(rad_y * scale)
-            transform = str(line["transform"]) #this is a bug in release v1 
+            #this is a bug in release v1
+            transform = str(line["transform"])
             if "rotate" in transform:
                 transform = transform.split("rotate(")[1].split(")")[0]
                 transform = transform.split(",")
@@ -106,56 +90,48 @@ def scaleSVG(svg_path, scale, cvt_color=False):
 def main():
     '''Main entrance'''
     parser = argparse.ArgumentParser(description='')
-    parser.add_argument('--train_00', type=str, help='the input svg directory (train-00)', required=True)
-    parser.add_argument('--train_01', type=str, help='the input svg directory (train-01)', default=None)
-    parser.add_argument('--test_00', type=str, help='the input svg directory (train-01)', default=None)
-    parser.add_argument('--svg_dir', type=str, help='the output svg directory', required=True)
-    parser.add_argument('--png_dir', type=str, help='the output png directory', required=True)
-    parser.add_argument('--scale', type=int, help='scale for svg->png', default=7)
+    parser.add_argument('--data_save_dir', type=str, help='download dir from download_data.py', required=True)
+    parser.add_argument('--scale', type=int, help='scale for svg->png', default=5)
     parser.add_argument('--val_ratio', type=float, help='pick validation set', default=0.05)
     parser.add_argument('--seed', type=int, help='random seed', default=123)
     parser.add_argument('--cvt_color', action="store_true")
     parser.add_argument('--thread_num', type=int, help='multiprocess number', default=32)
     args = parser.parse_args()
 
-    os.makedirs(f"{args.svg_dir}/train", exist_ok=True)
-    os.makedirs(f"{args.svg_dir}/val", exist_ok=True)
-    os.makedirs(f"{args.svg_dir}/test", exist_ok=True)
-    os.makedirs(f"{args.png_dir}/train", exist_ok=True)
-    os.makedirs(f"{args.png_dir}/val", exist_ok=True)
-    os.makedirs(f"{args.png_dir}/test", exist_ok=True)
+    svg_dir = f"{args.data_save_dir}/svg"
+    png_dir = f"{args.data_save_dir}/png"
+    os.makedirs(svg_dir, exist_ok=True)
+    os.makedirs(png_dir, exist_ok=True)
+    os.makedirs(f"{svg_dir}/train", exist_ok=True)
+    os.makedirs(f"{svg_dir}/val", exist_ok=True)
+    os.makedirs(f"{svg_dir}/test", exist_ok=True)
+    os.makedirs(f"{png_dir}/train", exist_ok=True)
+    os.makedirs(f"{png_dir}/val", exist_ok=True)
+    os.makedirs(f"{png_dir}/test", exist_ok=True)
 
     random.seed(args.seed)
-    # # merge <train_00> and <train_01> to <input_dir>
-    svg_paths = glob(os.path.join(args.train_00, "*.svg"))
-    if args.train_01 is not None:
-        svg_paths.extend(glob(os.path.join(args.train_01, "*.svg")))
 
-    svg_paths_val = random.sample(svg_paths, int(len(svg_paths)*args.val_ratio))
-    svg_paths_train = []
-    for x in svg_paths:
-        if x not in svg_paths_val:
-            svg_paths_train.append(x)
+    src = f"{args.data_save_dir}/train/train/svg_gt/*.svg"
+    dst = f"{svg_dir}/train"
+    cmd = f"cp -r {src}  {dst}"
+    os.system(cmd)
 
-    # # # train-00 and train-01 -> train / val
-    remap = RemapDict()
-    print("> convert label")
-    for svg_path in svg_paths_train:
-        cvt_label(svg_path, f"{args.svg_dir}/train", remap)
-    for svg_path in svg_paths_val:
-        cvt_label(svg_path, f"{args.svg_dir}/val", remap)
+    src = f"{args.data_save_dir}/val/val/svg_gt/*.svg"
+    dst = f"{svg_dir}/val"
+    cmd = f"cp -r {src}  {dst}"
+    os.system(cmd)
 
-    # # # test-00 -> test
-    svg_paths = glob(os.path.join(args.test_00, "*.svg"))
-    for svg_path in svg_paths:
-        cvt_label(svg_path, f"{args.svg_dir}/test", remap)
+    src = f"{args.data_save_dir}/test/test/svg_gt/*.svg"
+    dst = f"{svg_dir}/test"
+    cmd = f"cp -r {src}  {dst}"
+    os.system(cmd)
 
     # # # convert line color to black
     if args.cvt_color:
         print(f"[CVT Color] > to (0,0,0)")
-        svg_paths = glob(f"{args.svg_dir}/train/*.svg")
-        svg_paths.extend(glob(f"{args.svg_dir}/val/*.svg"))
-        svg_paths.extend(glob(f"{args.svg_dir}/test/*.svg"))
+        svg_paths = glob(f"{svg_dir}/train/*.svg")
+        svg_paths.extend(glob(f"{svg_dir}/val/*.svg"))
+        svg_paths.extend(glob(f"{svg_dir}/test/*.svg"))
         partial_func = partial(cvt_line_color)
         p = Pool(args.thread_num, init_worker)
         try:
@@ -166,10 +142,12 @@ def main():
         else:
             p.close()
         p.join()
+    else:
+        print('Not convert to black lines')
 
-    svg_paths = glob(f"{args.svg_dir}/train/*.svg")
-    svg_paths.extend(glob(f"{args.svg_dir}/val/*.svg"))
-    svg_paths.extend(glob(f"{args.svg_dir}/test/*.svg"))
+    svg_paths = glob(f"{svg_dir}/train/*.svg")
+    svg_paths.extend(glob(f"{svg_dir}/val/*.svg"))
+    svg_paths.extend(glob(f"{svg_dir}/test/*.svg"))
 
     print("svg > png")
     partial_func = partial(cvt_svg2png, replace1="/svg/", replace2="/png/", scale=args.scale)
